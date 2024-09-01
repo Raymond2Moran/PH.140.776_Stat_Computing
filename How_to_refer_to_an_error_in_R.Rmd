@@ -1,0 +1,27 @@
+---
+title: "How_to_refer_to_an_error_in_R"
+author: "Moran(Raymond) Guo"
+date: "2024-09-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For reporting an error in R, suppose we have an weird error that we want to report to someone:
+
+```{r error}
+stop("This R error is weird")
+```
+
+Now, copy the line of the code (line 17), then run `reprex::reprex()` in the R console. Then we got:
+
+``` r
+stop("This R error is weird")
+#> Error in eval(expr, envir, enclos): This R error is weird
+```
+
+`<sup>Created on 2024-09-01 with reprex v2.1.1</sup>`
+
+Which could be shared with someone using Git.
