@@ -1,0 +1,5 @@
+Why we want to use **Version Control**?
+
+If we change file name every time we change a document, we will have a long list of files with different formats of names.
+
+**So that's why.**
