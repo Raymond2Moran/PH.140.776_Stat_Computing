@@ -1,3 +1,1 @@
-README.Rmd
-
-"This is a line from RStudio"
+This is the current version of my note for class PH.140.776 - Statistical Computing.

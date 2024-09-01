@@ -1,5 +1,61 @@
-Why we want to use **Version Control**?
+---
+title: "A_test_file_for_Git_and_Github"
+author: "Moran(Raymond) Guo"
+date: "2024-09-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Aug 29th Class Note -- Edited Sep 1st
+
+1.  Why we want to use **Version Control**?
 
 If we change file name every time we change a document, we will have a long list of files with different formats of names.
 
 **So that's why.**
+
+Git also allow us to track the date and amount of changes made previously by different people.
+
+Git is useful for files that are text files, such as LaTeX, HTML, and/or R scripts. Less useful for PDF files, Powerpoint, etc., in which case you might consider using Google Drive/OneDrive.
+
+Pull: Download anything new from the cloud;
+
+Push: Upload anything you modified to the cloud.
+
+2.  Reproducible research.
+
+We need to try to reproduce a work, or a work need to be considerably reproducible/replicable for other researchers. Reproducibility includes: Computational reproducibility, Empirical reproducibility, and Statistical reproducibility.
+
+3.  `here` and `sessioninfo` package
+
+`here` package allows us to better manage file paths, especially when sharing code with different people.
+
+```{r here}
+here::here()
+here::here("here_example", "test.R")
+full_path <- "/Users/raymond/JHSPH_Stat_Computing/here_example/test.R"
+```
+
+This could avoid that when sharing code with others, they might not have username `Raymond` or folder name `JHSPH_Stat_Computing`, but the sub-folder name is the same.
+
+It also has `pyhere` package as an equivalent version of Python package.
+
+`sessioninfo` package allows us to document our system information and R packages we used in our script.
+
+```{r sessioninfo}
+print('Reprodicibility Information:')
+Sys.time()
+proc.time()
+options(width = 120)
+sessioninfo::session_info()
+```
+
+4.  Literate programming
+
+```{r plot1, eval=TRUE, echo=TRUE, height=4, width=5}
+data(airquality)
+plot(airquality$Ozone ~ airquality$Wind)
+```
