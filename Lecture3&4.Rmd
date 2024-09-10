@@ -1,0 +1,31 @@
+---
+title: "Lecture3&4"
+author: "Moran(Raymond) Guo"
+date: "2024-09-10"
+output: html_document
+bibliography: my-ref.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Citation**
+
+[@R-rmarkdown]
+
+```{r create reference}
+knitr::write_bib("rmarkdown", file = "my-ref.bib")
+list.files()
+```
+
+**Here package**
+
+```{r wd}
+getwd()
+here::here()
+identical(here::here(), getwd())
+
+here::here("here_example", "test.R")
+list.files(here::here("here_example"))
+```
