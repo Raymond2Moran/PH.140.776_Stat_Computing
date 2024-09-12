@@ -174,27 +174,73 @@ country
 
 3.  What is average `rating` scores from reviews of chocolate bars that have Ecuador as `country_of_bean_origin` in this dataset? For this same set of reviews, also calculate (1) the total number of reviews and (2) the standard deviation of the `rating` scores. Your answer should be a new data frame with these three summary statistics in three columns. Label the name of these columns `mean`, `sd`, and `total`.
 
-```{r}
-# Add your solution here
+```{r summary statistics}
+library(dplyr)
+
+ecuador_statistics <- chocolate %>%
+  filter(country_of_bean_origin == "Ecuador") %>%
+  summarise(
+    mean = mean(rating, na.rm = TRUE),
+    sd = sd(rating, na.rm = TRUE),
+    total = n()
+  )
+
+ecuador_statistics
 ```
+The average `rating` scores from Ecuador chocolate bars is $3.16$, with standard deviation of $0.51$. There are a total of $219$ observations included.
+
 
 4.  Which company location makes the best chocolate (or has the highest ratings on average) with beans from Ecuador?
 
-```{r}
-# Add your solution here
+```{r which country}
+library(dplyr)
+
+best_company_ecu <- chocolate %>%
+  filter(country_of_bean_origin == "Ecuador") %>%   
+  group_by(company_location) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE)) %>%
+  arrange(desc(avg_rating))
+
+best_company_ecu
 ```
+From the results, we can see that Australia makes the best chocolate with beans from Ecuador.
+
 
 5.  Calculate the average rating across all country of origins for beans. Which top 3 countries (for bean origin) have the highest ratings on average?
 
-```{r}
-# Add your solution here
+```{r average rating across all countries}
+library(dplyr)
+
+top_countries <- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE)) %>%
+  arrange(desc(avg_rating))
+
+top_3_countries <- head(top_countries, 3)
+
+top_3_countries
 ```
+Tobago, China, and Sao Tome & Principe have the highest rating on average for the bean origin.
+
 
 6.  Following up on the previous problem, now remove any countries of bean origins that have less than 10 chocolate bar reviews. Now, which top 3 countries have the highest ratings on average?
 
-```{r}
-# Add your solution here
+```{r average rating with 10+ reviews}
+library(dplyr)
+
+top_countries_ten_plus <- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE),
+            total = n()) %>%
+  filter(total >= 10) %>%
+  arrange(desc(avg_rating))
+
+top_3_countries_ten_plus <- head(top_countries_ten_plus, 3)
+
+top_3_countries_ten_plus
 ```
+Solomon Islands, Congo, and Cuba have the highest ratings on average after filtering out those countries with fewer than 10 reviews.
+
 
 7.  For this last part, let's explore the relationship between percent chocolate and ratings.
 
