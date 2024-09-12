@@ -187,8 +187,8 @@ ecuador_statistics <- chocolate %>%
 
 ecuador_statistics
 ```
-The average `rating` scores from Ecuador chocolate bars is $3.16$, with standard deviation of $0.51$. There are a total of $219$ observations included.
 
+The average `rating` scores from Ecuador chocolate bars is $3.16$, with standard deviation of $0.51$. There are a total of $219$ observations included.
 
 4.  Which company location makes the best chocolate (or has the highest ratings on average) with beans from Ecuador?
 
@@ -203,8 +203,8 @@ best_company_ecu <- chocolate %>%
 
 best_company_ecu
 ```
-From the results, we can see that Australia makes the best chocolate with beans from Ecuador.
 
+From the results, we can see that Australia makes the best chocolate with beans from Ecuador.
 
 5.  Calculate the average rating across all country of origins for beans. Which top 3 countries (for bean origin) have the highest ratings on average?
 
@@ -220,8 +220,8 @@ top_3_countries <- head(top_countries, 3)
 
 top_3_countries
 ```
-Tobago, China, and Sao Tome & Principe have the highest rating on average for the bean origin.
 
+Tobago, China, and Sao Tome & Principe have the highest rating on average for the bean origin.
 
 6.  Following up on the previous problem, now remove any countries of bean origins that have less than 10 chocolate bar reviews. Now, which top 3 countries have the highest ratings on average?
 
@@ -239,8 +239,8 @@ top_3_countries_ten_plus <- head(top_countries_ten_plus, 3)
 
 top_3_countries_ten_plus
 ```
-Solomon Islands, Congo, and Cuba have the highest ratings on average after filtering out those countries with fewer than 10 reviews.
 
+Solomon Islands, Congo, and Cuba have the highest ratings on average after filtering out those countries with fewer than 10 reviews.
 
 7.  For this last part, let's explore the relationship between percent chocolate and ratings.
 
@@ -271,7 +271,51 @@ dat %>%
 ```
 
 ```{r}
-# Add your solution here
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+
+countries_with_50_reviews <- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(total_reviews = n()) %>%
+  filter(total_reviews >= 50) %>%
+  pull(country_of_bean_origin)  # Get list of countries with >= 50 reviews
+
+
+chocolate_filtered <- chocolate %>%
+  filter(country_of_bean_origin %in% countries_with_50_reviews)
+
+
+chocolate_filtered <- chocolate_filtered %>%
+  mutate(
+    chocolate_percentage = as.numeric(substr(cocoa_percent, 1, nchar(cocoa_percent)-1)),
+    
+    percent_group = case_when(
+      chocolate_percentage < 60 ~ "<60%",
+      chocolate_percentage >= 60 & chocolate_percentage < 70 ~ "60%-<70%",
+      chocolate_percentage >= 70 & chocolate_percentage < 90 ~ "70%-<90%",
+      chocolate_percentage >= 90 ~ ">=90%"
+    )
+  )
+
+chocolate_filtered <- chocolate_filtered %>%
+  mutate(percent_group = fct_relevel(percent_group, "<60%", "60%-<70%", "70%-<90%", ">=90%"))
+
+ggplot(chocolate_filtered, aes(x = percent_group, y = rating, fill = percent_group)) +
+  geom_boxplot() +
+  facet_wrap(~ country_of_bean_origin) +   # Facet by country
+  labs(title = "Ratings by Chocolate Percentage and Country of Bean Origin",
+       x = "Chocolate Percentage Group",
+       y = "Rating",
+       fill = "Chocolate Percentages") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",                        
+    legend.title = element_text(size = 12, face = "bold"), 
+    legend.text = element_text(size = 10) 
+  )
 ```
 
 # Part 2: Join two datasets together
@@ -291,8 +335,60 @@ The goal of this part of the assignment is to join two datasets together. `gapmi
 
 -   Check to see if there are any `NA`s in the new column. If there are any `NA`s, add the continent name for each row.
 
-```{r}
-# Add your solution here
+```{r continent}
+# I use `gapminder` package to map country name to the corresponding continent name that country belongs to.
+# install.packages('gapminder')
+library(dplyr)
+library(ggplot2)
+library(gapminder)
+
+country_to_continent <- gapminder %>%
+  select(country, continent) %>%
+  distinct()
+
+# Left join two datasets
+
+chocolate <- chocolate %>%
+  left_join(country_to_continent, by = c("country_of_bean_origin" = "country"))
+
+# Remove origin where is `blend`
+
+chocolate <- chocolate %>%
+  filter(country_of_bean_origin != "Blend")
+
+# Filter for origins with >= 10 review
+
+chocolate <- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  filter(n() >= 10) %>%
+  ungroup()
+
+missing_continents <- chocolate %>%
+  filter(is.na(continent))
+
+unique(missing_continents$country_of_bean_origin)
+
+# Manually assign continents with NA values
+chocolate <- chocolate %>%
+  mutate(continent = case_when(
+    is.na(continent) & country_of_bean_origin %in% c("Fiji", "Papua New Guinea", "Vanuatu", "Solomon Islands") ~ "Oceania",
+    is.na(continent) & country_of_bean_origin %in% c("Sao Tome", "Congo") ~ "Africa",
+    is.na(continent) & country_of_bean_origin %in% c("Trinidad", "Belize", "Grenada", "St. Lucia", "U.S.A.") ~ "Americas",
+    TRUE ~ continent
+  ))
+
+# Check that all missing continents have been addressed
+missing_continents <- chocolate %>%
+  filter(is.na(continent))
+
+
+ggplot(chocolate, aes(x = continent, y = rating, fill = continent)) +
+  geom_violin(trim = FALSE) +
+  labs(title = "Violin Plot of Ratings by Continent",
+       x = "Continent",
+       y = "Rating") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
 ```
 
 # Part 3: Convert wide data into long data
