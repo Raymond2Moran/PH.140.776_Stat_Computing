@@ -1,15 +1,9 @@
 ---
 title: "Project 1"
 author:
-  - name: Leonardo Collado Torres
-    url: http://lcolladotor.github.io/
-    affiliations:
-      - id: libd
-        name: Lieber Institute for Brain Development
-        url: https://libd.org/
-      - id: jhsph
-        name: Johns Hopkins Bloomberg School of Public Health Department of Biostatistics
-        url: https://publichealth.jhu.edu/departments/biostatistics
+  - name: Moran Guo
+    url: https://raymond2moran.github.io/Self_Intro/
+
 description: "Finding great chocolate bars!"
 categories: [project 1, projects]
 ---
@@ -134,9 +128,13 @@ In this part, use functions from `dplyr` and `ggplot2` to answer the following q
 
 ```{r EDA}
 library(ggplot2)
-library(gridExtra)
+#library(gridExtra)
 
 # Create the histograms using ggplot2
+
+plot_bins <- ggplot(chocolate, aes(x = rating)) +
+  geom_histogram(fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Ratings (default Bins)", x = "Rating", y = "Count")
 
 plot_10bins <- ggplot(chocolate, aes(x = rating)) +
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
@@ -154,7 +152,11 @@ plot_25bins <- ggplot(chocolate, aes(x = rating)) +
   geom_histogram(bins = 25, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Ratings (25 Bins)", x = "Rating", y = "Count")
 
-grid.arrange(plot_10bins, plot_15bins, plot_20bins, plot_25bins, nrow = 2, ncol = 2)
+plot_bins
+plot_10bins
+plot_15bins
+plot_20bins
+plot_25bins
 ```
 
 I think bins \# = 15 gives the best histogram to (1) avoid sharp separations between bins and (2) give a more detail description of the overall trend of rating than 10 bins.
@@ -251,7 +253,7 @@ Use the functions in `dplyr`, `tidyr`, and `lubridate` to perform the following 
 3.  Using the new column described in #2, re-order the factor levels (if needed) to be starting with the smallest percentage group and increasing to the largest percentage group (**Hint** check out the `fct_relevel()` function from `forcats`).
 4.  For each country, make a set of four side-by-side boxplots plotting the groups on the x-axis and the ratings on the y-axis. These plots should be faceted by country.
 
-On average, which category of chocolate percentage is most highly rated? Do these countries mostly agree or are there disagreements?
+**On average, which category of chocolate percentage is most highly rated? Do these countries mostly agree or are there disagreements?**
 
 **Hint**: You may find the `case_when()` function useful in this part, which can be used to map values from one variable to different values in a new variable (when used in a `mutate()` call).
 
@@ -318,6 +320,26 @@ ggplot(chocolate_filtered, aes(x = percent_group, y = rating, fill = percent_gro
   )
 ```
 
+```{r avg rating}
+avg_ratings <- chocolate_filtered %>%
+  group_by(percent_group) %>%
+  summarise(avg_rating = mean(rating)) %>%
+  arrange(desc(avg_rating))
+
+avg_ratings
+
+
+agreement_countries <- chocolate_filtered %>%
+  group_by(country_of_bean_origin, percent_group) %>%
+  summarise(
+    average_rating = mean(rating, na.rm = TRUE)) %>%
+    spread(percent_group, average_rating)
+
+agreement_countries
+```
+
+So we can see from the average rating data that the category `60%-<70%` has the highest average rating, with 9 out of 16 countries agree on that.
+
 # Part 2: Join two datasets together
 
 The goal of this part of the assignment is to join two datasets together. `gapminder` is a [R package](https://cran.r-project.org/web/packages/gapminder/README.html) that contains an excerpt from the [Gapminder data](https://www.gapminder.org/data/).
@@ -337,6 +359,7 @@ The goal of this part of the assignment is to join two datasets together. `gapmi
 
 ```{r continent}
 # I use `gapminder` package to map country name to the corresponding continent name that country belongs to.
+
 # install.packages('gapminder')
 library(dplyr)
 library(ggplot2)
@@ -369,6 +392,7 @@ missing_continents <- chocolate %>%
 unique(missing_continents$country_of_bean_origin)
 
 # Manually assign continents with NA values
+
 chocolate <- chocolate %>%
   mutate(continent = case_when(
     is.na(continent) & country_of_bean_origin %in% c("Fiji", "Papua New Guinea", "Vanuatu", "Solomon Islands") ~ "Oceania",
@@ -427,8 +451,47 @@ review_date     feature   mean_score
 
 -   Do not worry about the ordering of the rows or columns. Depending on whether you use `gather()` or `pivot_longer()`, the order of your output may differ from what is printed above. As long as the result is a tidy data set, that is sufficient.
 
-```{r}
-# Add your solution here
+```{r tidy data}
+# Load necessary libraries
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+chocolate <- chocolate %>%
+  mutate(
+    ingredients = ifelse(is.na(ingredients), "none", ingredients),
+    beans = ifelse(str_detect(ingredients, "B"), 1, 0),
+    sugar = ifelse(str_detect(ingredients, "S,|S$"), 1, 0),
+    cocoa_butter = ifelse(str_detect(ingredients, "C"), 1, 0),
+    vanilla = ifelse(str_detect(ingredients, "V"), 1, 0),
+    lecithin = ifelse(str_detect(ingredients, "L"), 1, 0),
+    salt = ifelse(str_detect(ingredients, "Sa"), 1, 0)
+  )
+
+chocolate <- chocolate %>%
+  mutate(
+    char_cocoa = ifelse(str_detect(most_memorable_characteristics, "cocoa"), 1, 0),
+    char_sweet = ifelse(str_detect(most_memorable_characteristics, "sweet"), 1, 0),
+    char_nutty = ifelse(str_detect(most_memorable_characteristics, "nutty"), 1, 0),
+    char_creamy = ifelse(str_detect(most_memorable_characteristics, "creamy"), 1, 0),
+    char_roasty = ifelse(str_detect(most_memorable_characteristics, "roasty"), 1, 0),
+    char_earthy = ifelse(str_detect(most_memorable_characteristics, "earthy"), 1, 0)
+  )
+
+mean_by_year <- chocolate %>%
+  group_by(review_date) %>%
+  summarise(across(beans:salt, mean, na.rm = TRUE),
+            across(char_cocoa:char_earthy, mean, na.rm = TRUE))
+
+long_data <- mean_by_year %>%
+  pivot_longer(cols = beans:char_earthy,
+               names_to = "feature",      
+               values_to = "mean_score")
+
+long_data
 ```
 
 # Part 4: Data visualization
@@ -452,8 +515,28 @@ Consider playing around with the `theme()` function to make the figure shine, in
 
 -   Don't worry about the ordering of the rows or columns. Depending on whether you use `gather()` or `pivot_longer()`, the order of your output may differ from what is printed above. As long as the result is a tidy data set, that is sufficient.
 
-```{r}
-# Add your solution here
+```{r ggplot2}
+library(ggplot2)
+
+# Create the scatter plot with facets for each feature
+ggplot(long_data, aes(x = review_date, y = mean_score)) +
+  geom_point(alpha = 0.25, color = "blue") +
+  geom_smooth(method = "loess", formula = y ~ x, se = FALSE, color = "pink") +
+  facet_wrap(~ feature, scales = "free_y") +
+  labs(
+    title = "Mean Scores Over Time for Different Features",  # Overall title
+    subtitle = "The use of vanilla, lecithin, salt decreased over time;\nThe charater of cocoa bounces back after year 2015.",
+    x = "Review Year",
+    y = "Mean Review Score",
+    caption = "Created by Moran Guo"  # Add your name in the caption
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10, face = "italic"), 
+    plot.caption = element_text(size = 9, hjust = 0),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 ```
 
 # Part 5: Make the worst plot you can!
@@ -467,15 +550,53 @@ Using the `chocolate` dataset (or any of the modified versions you made througho
 1.  Make the absolute worst plot that you can. You need to customize it in **at least 7 ways** to make it awful.
 2.  In your document, write 1 - 2 sentences about each different customization you added (using bullets -- i.e. there should be at least 7 bullet points each with 1-2 sentences), and how it could be useful for you when you want to make an awesome data visualization.
 
-```{r}
-# Add your solution here
+```{r worst plot}
+library(ggplot2)
+
+ggplot(chocolate_filtered, aes(x = review_date, y = rating, fill = country_of_bean_origin)) +
+    geom_bar(stat = "identity") +  # Use geom_bar for continuous data (bad choice)
+    scale_fill_manual(values = rep("yellow", 16)) +  # All identical colors
+    theme_classic(base_size = 10) +  # Font too large
+    theme(
+        panel.background = element_rect(fill = "pink"),  # Distracting background color
+        axis.text.x = element_text(angle = 135, vjust = 0.5, color = "red", size = 15),  # Over-rotated x-axis labels
+        legend.position = "top",  # Legend in the wrong place, makes the plot hard to interpret
+        plot.title = element_text(hjust = 1.5, color = "green")  # Incorrect justification and color
+    ) +
+    labs(
+        title = "Absolutely Worst Plot",  # Title that adds no meaning
+        x = "Time",  # Vague label for x-axis
+        y = "Score",  # Inaccurate label for y-axis
+        caption = "MaDE bY mORaN gUo"  # Unnecessary caption
+    )
 ```
+
+Why this plot is the worst plot?
+
+-   Legend is too big so that it blocks the entire title. So a proper legend size should be utilized.
+
+-   The legend also failed to serve the purpose of a legend because all the labels are the same color (yellow), and the color is also not ideal. This makes the whole plot hard to read.
+
+-   The legend name `country_of_bean_origin` is too raw and need some meaningful interpretations, which could be as simple as "Bean Origin"..
+
+-   (If you can see the title) I used green colored font and misplaced the title.
+
+-   The background color is pink, which should be the color that avoid using (generally), unless has its own significance, on a plot.
+
+-   Because of the legend color (it's the same for all countries), the entire plot lost its meaning. It is also a bad idea to use bar plot to visualize continuous data (such as rating).
+
+-   The Y-axis label is **entirely wrong**. It should be named as "Number of Reviews" or similar.
+
+-   The X-axis ticks label is over-rotated, making it a totally wrong option.
+
+-   The caption is entirely unnecessary.
 
 # Part 6: Make my plot a better plot!
 
 The goal is to take my sad looking plot and make it better! If you'd like an [example](https://twitter.com/drmowinckels/status/1392136510468763652), here is a tweet I came across of someone who gave a talk about how to zhoosh up your ggplots.
 
 ```{r}
+
 chocolate %>%
     ggplot(aes(
         x = as.factor(review_date),
@@ -490,9 +611,54 @@ chocolate %>%
 1.  You need to customize it in **at least 7 ways** to make it better.
 2.  In your document, write 1 - 2 sentences about each different customization you added (using bullets -- i.e. there should be at least 7 bullet points each with 1-2 sentences), describing how you improved it.
 
-```{r}
-# Add your solution here
+```{r best plot}
+library(ggplot2)
+library(dplyr)
+library(viridis)
+
+chocolate %>%
+  ggplot(aes(
+    x = as.factor(review_date),
+    y = rating, 
+    fill = as.numeric(review_date)
+  )) +
+  geom_violin(trim = FALSE, color = "gray30", alpha = 0.8) +
+  scale_fill_gradient2(low = "lightgreen", mid = "white", high = "red", midpoint = 2015) +
+  geom_boxplot(width = 0.2, color = "black", outlier.shape = NA) +
+  labs(
+    title = "Distribution of Chocolate Ratings by Year",
+    subtitle = "Violin plots with inner boxplots", 
+    x = "Review Year",
+    y = "Chocolate Rating",
+    fill = "Review Year",
+    caption = "Created by Moran Guo"
+  ) +
+  theme_classic(base_size = 15) + 
+  theme(
+    plot.title = element_text(size = 15, face = "bold", color = "black", hjust = 0.5), 
+    plot.subtitle = element_text(size = 10, color = "black", hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right",
+    legend.title = element_text( size = 12),
+    legend.text = element_text(size = 10)
+  )
 ```
+
+The ways I made the plot to look better:
+
+-   Used `geom_violin(trim = FALSE)` to display the full range of the data and making the plot more informative.
+
+-   Added `geom_boxplot` onto the violin plot and thus allowing for both detailed value (such as median, IQR, etc.) and high-level distributions of the data.
+
+-   Applied `Viridis` continuous color palette to the plot, which is both colorblind-friendly and visually appealing. This enhances the plot's aesthetic component.
+
+-   Used `theme_classic()` to avoid the major grids of the plot and thus highlighting the distribution and also gives a cleaner background.
+
+-   Added informative & concise title and subtitle to the plot, depicting the gist of the plot.
+
+-   Added informative legend title instead of using raw variable name `review_date` which was unprofessional.
+
+-   Adjusted X and Y axis labels and rotated Y-axis ticks to avoid overlap and make them more accessible to the readers.
 
 # R session information
 
