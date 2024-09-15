@@ -320,6 +320,26 @@ ggplot(chocolate_filtered, aes(x = percent_group, y = rating, fill = percent_gro
   )
 ```
 
+```{r avg rating}
+avg_ratings <- chocolate_filtered %>%
+  group_by(percent_group) %>%
+  summarise(avg_rating = mean(rating)) %>%
+  arrange(desc(avg_rating))
+
+avg_ratings
+
+
+agreement_countries <- chocolate_filtered %>%
+  group_by(country_of_bean_origin, percent_group) %>%
+  summarise(
+    average_rating = mean(rating, na.rm = TRUE)) %>%
+    spread(percent_group, average_rating)
+
+agreement_countries
+```
+
+So we can see from the average rating data that the category `60%-<70%` has the highest average rating, with 9 out of 16 countries agree on that.
+
 # Part 2: Join two datasets together
 
 The goal of this part of the assignment is to join two datasets together. `gapminder` is a [R package](https://cran.r-project.org/web/packages/gapminder/README.html) that contains an excerpt from the [Gapminder data](https://www.gapminder.org/data/).
@@ -610,7 +630,8 @@ chocolate %>%
     subtitle = "Violin plots with inner boxplots", 
     x = "Review Year",
     y = "Chocolate Rating",
-    fill = "Review Year"
+    fill = "Review Year",
+    caption = "Created by Moran Guo"
   ) +
   theme_classic(base_size = 15) + 
   theme(
