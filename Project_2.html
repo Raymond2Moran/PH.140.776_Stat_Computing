@@ -468,7 +468,15 @@ sample_sd &lt;- function(x) {
     sd_val &lt;- sqrt(sum(squared_div) / (n - 1))
     
     return(sd_val)
-}</code></pre>
+}
+
+# Example output:
+
+x1 &lt;- c(2, 3, 4, 5, 6)
+sample_mean(x1)</code></pre>
+<pre><code>## [1] 4</code></pre>
+<pre class="r"><code>sample_sd(x1)</code></pre>
+<pre><code>## [1] 1.581139</code></pre>
 </div>
 <div id="part-1c-confidence-intervals" class="section level3">
 <h3>Part 1C: Confidence intervals</h3>
@@ -521,7 +529,18 @@ t_score &lt;- qt(p = alpha / 2, df = degrees_freedom, lower.tail = FALSE)</code>
     upper_bound &lt;- mean_val + me
     
     return(c(lower_bound = lower_bound, upper_bound = upper_bound))
-}</code></pre>
+}
+
+# Example output with two different levels of conf
+
+x2 &lt;- c(1,1,3,5,6,7,3,2,5,7,9,12)
+
+calculate_CI(x2, conf = 0.90)</code></pre>
+<pre><code>## lower_bound upper_bound 
+##    3.350340    6.816327</code></pre>
+<pre class="r"><code>calculate_CI(x2)</code></pre>
+<pre><code>## lower_bound upper_bound 
+##    2.959426    7.207241</code></pre>
 <p>Include example of output from your function showing the output when
 using two different levels of <code>conf</code>.</p>
 <div class="callout-note">
@@ -812,6 +831,9 @@ blank output.</p>
 <p>The last part is generating the histogram. I used rainfall data (mm)
 in Log scale and light blue color for enhanced readability. Also, data
 sources and creator of the graph are properly cited.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Codes:</strong></li>
+</ol>
 <pre class="r"><code>rainfall_histogram &lt;- function(city_name, year){
   name &lt;- city_name
   yr &lt;- year
