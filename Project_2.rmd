@@ -300,7 +300,7 @@ ggplot(df_filtered, aes(x = date)) +
         x = "Date",
         y = "Temperature (°C)",
         color = "Temperature Type",
-        caption = "Data source: TidyTuesday, Created by Moran Guo"
+        caption = "Data retrieved from TidyTuesday, Created by Moran Guo"
     ) +
     theme_classic() +
     theme(
@@ -376,6 +376,8 @@ rainfall_histogram <- function(name, Year){
     )
 }
 ```
+
+Example Usage:
 
 ```{r histogram example usage}
 rainfall_histogram("Sydney", 2019)
