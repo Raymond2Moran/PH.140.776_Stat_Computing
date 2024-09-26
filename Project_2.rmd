@@ -63,17 +63,19 @@ Include at least one example of output using your function.
 ```{r Exp function}
 Exp <- function(x, k) {
     output <- 1
-    
-    #term <- 1
-    for (i in 0:k) {
-        term <- 1
-        term <- term * x^(i) / factorial(i)  
+
+    for (i in 1:k) {
+        term <- x^i / factorial(i) 
         output <- output + term 
-        print(term)
     }
     
     return(output)
 }
+
+
+# Example output
+
+Exp(3,2)
 ```
 
 ### Part 1B: Sample mean and sample standard deviation

@@ -421,17 +421,20 @@ factorials.</p></li>
 </div>
 <pre class="r"><code>Exp &lt;- function(x, k) {
     output &lt;- 1
-    
-    #term &lt;- 1
-    for (i in 0:k) {
-        term &lt;- 1
-        term &lt;- term * x^(i) / factorial(i)  
+
+    for (i in 1:k) {
+        term &lt;- x^i / factorial(i) 
         output &lt;- output + term 
-        print(term)
     }
     
     return(output)
-}</code></pre>
+}
+
+
+# Example output
+
+Exp(3,2)</code></pre>
+<pre><code>## [1] 8.5</code></pre>
 </div>
 <div id="part-1b-sample-mean-and-sample-standard-deviation" class="section level3">
 <h3>Part 1B: Sample mean and sample standard deviation</h3>
