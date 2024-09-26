@@ -295,7 +295,7 @@ ggplot(df_filtered, aes(x = date)) +
     geom_line(aes(y = min_temp, color = "Min Temp"), size = 0.25) +
     facet_wrap(~ city_name, scales = "free_y") +
     labs(
-        title = "Temperature Trends in Australian Cities (2014 Onwards)",
+        title = "Temperature Trends in Australian Cities (2014 Later)",
         subtitle = "Seasonal flucturations: observed among major Australian cities from 2014,\nwith Canberra showing slightly bigger flucturation than the rest.",
         x = "Date",
         y = "Temperature (°C)",
@@ -351,19 +351,33 @@ For this section,
 
 3.  Include at least one example of output from your function.
 
+```{=html}
+<!-- -->
+```
+1.  **Short description:**
+
+My function, `rainfall_histogram`, first records the user input value `city_name` and `year`. Then, it filters the data frame `df` for the precipitation records for that given city and that year.
+
+If there are at least one records that are left, then the function proceeds to plotting; if not, or `nrow(filtered_data) == 0` is `TRUE`, then the function stops and throws an error out indicating there are no such data. The `stop()` and error message allows user to better understand why they are not observing expected output from the function, instead of being confused about the blank output.
+
+The last part is generating the histogram. I used rainfall data (mm) in Log scale and light blue color for enhanced readability. Also, data sources and creator of the graph are properly cited.
+
 ```{r histogram of rainfall}
-rainfall_histogram <- function(name, Year){
+rainfall_histogram <- function(city_name, year){
+  name <- city_name
+  yr <- year
+  
   filtered_data <- df %>%
-    filter(city_name == toupper(name), year == Year)
-  print(filtered_data)
+    filter(city_name == toupper(name), year == yr)
+
   if (nrow(filtered_data) == 0){
-    stop(paste("There is no data available for", name, "in the year", Year))
+    stop(paste("There is no data available for", name, "in the year", yr))
   }
   
   ggplot(filtered_data, aes(x = log(rainfall))) +
     geom_histogram(binwidth = 0.3, fill = "lightblue", color = "black") + 
     labs(
-      title = paste("Rainfall Distribution in", name, "for the Year", Year, "(Log Scale)"),
+      title = paste("Rainfall Distribution in", name, "for the Year", yr, "(Log Scale)"),
       x = "Log(Rainfall) (mm)",
       y = "Frequency",
       caption = "Data retrieved from TidyTuesday, Created by Moran Guo"
@@ -377,10 +391,10 @@ rainfall_histogram <- function(name, Year){
 }
 ```
 
-Example Usage:
+3.  **Example Usage:**
 
 ```{r histogram example usage}
-rainfall_histogram("Sydney", 2019)
+rainfall_histogram("Sydney", 2016)
 ```
 
 # Part 4: Apply functions and plot
@@ -423,7 +437,7 @@ ggplot(rain_df, aes(x = year, y = mean_rainfall)) +
   geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 0.1, color = "grey") +  # Error bars for CI
   facet_wrap(~ city_name, scales = "free_y") +  # Facet by city
   labs(
-    title = "Mean Rainfall and 95% CIs (2014 Onwards)",
+    title = "Mean Rainfall and 95% CIs (2014 Later)",
     subtitle = "Grouped by cities",
     x = "Year",
     y = "Mean Rainfall (mm)",
