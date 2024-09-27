@@ -75,7 +75,7 @@ Exp <- function(x, k) {
 
 # Example output
 
-Exp(3,2)
+Exp(3,2) #1 + 3 + 3^2/2 = 17/2 = 8.5
 ```
 
 ### Part 1B: Sample mean and sample standard deviation
