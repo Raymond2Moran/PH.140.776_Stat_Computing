@@ -105,8 +105,7 @@ sales <- sales %>%
 
 sales <- sales %>%
   mutate(
-    country = fct_lump(country, n = 2),  # Keep the top 2 countries
-    country = fct_recode(country, World = "Other")  # Rename "Other" category to "World"
+    country = fct_recode(country, World = "WW", World = "World")
   )
 
 sales <- sales %>%
@@ -232,7 +231,7 @@ ggplot(filtered_sales, aes(x = released, y = sales_millions, color = artist)) +
   facet_wrap(~ country, ncol = 1) +
   labs(
     title = "Sales of Studio Albums by Release Date",
-    subtitle = "Comparison of Beyoncé and Taylor Swift Album Sales in the UK, US, and World",
+    subtitle = "Comparison of Beyonce and Taylor Swift Album Sales in the UK, US, and World",
     x = "Release Date",
     y = "Sales (in millions)",
     color = "Artist"
@@ -330,7 +329,7 @@ Using the `b_lyrics` dataset,
 8.  Use `ggplot2` to create a bar plot with the top words on the y-axis and the frequency of each word on the x-axis. Color each bar by the sentiment of each word from the "bing" sentiment lexicon. Bars should be ordered from most frequent on the top to least frequent on the bottom of the plot.
 9.  Create a word cloud of the top 25 most frequent words.
 
-```{r}
+```{r sentiment b}
 # Load required packages
 library(tidytext)
 library(wordcloud)
@@ -350,8 +349,6 @@ word_counts <- b_tokens_cleaned %>%
 
 word_sentiments <- word_counts %>%
   inner_join(bing_lex, by = "word") 
-
-
 
 top_words <- word_sentiments %>%
   top_n(25, n)  
@@ -377,7 +374,7 @@ wordcloud(words = top_words$word, freq = top_words$n, colors = ifelse(top_words$
 
 Repeat the same analysis as above in Part 2C, but for `ts_lyrics`.
 
-```{r}
+```{r sentiment ts}
 # Load necessary libraries
 library(dplyr)
 library(tidytext)
@@ -389,15 +386,12 @@ library(tidyr)
 ts_tokens <- ts_lyrics %>%
   unnest_tokens(word, line)  
 
-
 data("stop_words")
 ts_tokens_cleaned <- ts_tokens %>%
   anti_join(stop_words, by = "word")
 
-
 ts_word_counts <- ts_tokens_cleaned %>%
   count(word, sort = TRUE)  
-
 
 ts_word_sentiments <- ts_word_counts %>%
   inner_join(bing_lex, by = "word") 
@@ -424,6 +418,7 @@ wordcloud(words = ts_top_words$word, freq = ts_top_words$n,
           vfont=c("serif","plain"))
 ```
 
+
 ## Part 2E
 
 Using the `ts_lyrics` dataset,
@@ -443,7 +438,7 @@ Using the `ts_lyrics` dataset,
 
 #install.packages('textdata')
 
-word_counts_album <- ts_tokens_clean %>%
+word_counts_album <- ts_tokens_cleaned %>%
   count(Album, word, sort = TRUE)
 
 
@@ -475,9 +470,9 @@ ggplot(combined_data, aes(x = released, y = average_sentiment, size = sales_mill
   ) +
   theme_classic()
 
-cat("Interpretation:\n")
-
 ```
+
+Interpretation: We could generally observe a decreasing trend in terms of the average sentiment score of Taylor Swift's albums from year 2006. It seems that after year 2006, the sentiment of Taylor Swifts' songs became more and more negative. However, we can see that at year 2019, she released an album "Lover" with a slightly positive sentiment score.
 
 # R session information
 
