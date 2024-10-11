@@ -175,11 +175,12 @@ total_sales <- total_sales %>%
 ggplot(total_sales, aes(x = artist, y = percentages, fill = country)) +
   geom_bar(stat = "identity", position = "fill", width = 0.75) +
   labs(
-    title = "Percentage of Album Sales by Regions",
-    subtitle = "Comparison of Beyoncé and Taylor Swift Album Sales in the UK, US, and World",
+    title = "Percentage of Beyoncé and Taylor Swift Album Sales by Regions",
+    subtitle = "Taylor Swift wins in the US; Beyoncé advantages in the World sales.",
     x = "Artist",
     y = "Percentage of Sales",
-    fill = "Country"
+    fill = "Country",
+    caption = "Created by Moran Guo"
   ) +
   scale_y_continuous(labels = scales::percent_format()) +
   theme_classic()
@@ -209,7 +210,8 @@ ggplot(world_sales, aes(x = fct_reorder(title, as.numeric(sales_millions), .desc
     subtitle = "Worldwide Album Sales in Millions",
     x = "Album Title",
     y = "Sales (in millions)",
-    fill = "Artist"
+    fill = "Artist",
+    caption = "Created by Moran Guo"
   ) +
   theme_classic() +
   theme(axis.text.y = element_text(size = 8))
@@ -230,11 +232,12 @@ ggplot(filtered_sales, aes(x = released, y = sales_millions, color = artist)) +
   geom_point(size = 2, alpha = 0.8) + 
   facet_wrap(~ country, ncol = 1) +
   labs(
-    title = "Sales of Studio Albums by Release Date",
-    subtitle = "Comparison of Beyonce and Taylor Swift Album Sales in the UK, US, and World",
+    title = "Comparison of Beyoncé and Taylor Swift Album Sales in the UK, US, \nand World",
+    subtitle = "Album sales drawed in the UK; Taylor Swift took advantages in the US and the World.",
     x = "Release Date",
     y = "Sales (in millions)",
-    color = "Artist"
+    color = "Artist",
+    caption = "Created by Moran Guo"
   ) +
   theme_bw() +
   theme(
@@ -269,7 +272,7 @@ ts_lyrics <- ts_lyrics %>%
 hello_lines <- ts_lyrics %>%
   filter(str_detect(line, regex("\\bhello\\b", ignore_case = TRUE)))
 
-print(hello_lines)
+#print(hello_lines)
 
 num_hello_lines <- nrow(hello_lines)
 cat("Number of lines containing the word 'hello':", num_hello_lines, "\n")
@@ -277,7 +280,7 @@ cat("Number of lines containing the word 'hello':", num_hello_lines, "\n")
 goodbye_lines <- ts_lyrics %>%
   filter(str_detect(line, regex("\\bgoodbye\\b", ignore_case = TRUE)))
 
-print(goodbye_lines)
+#print(goodbye_lines)
 
 num_goodbye_lines <- nrow(goodbye_lines)
 cat("Number of lines containing the word 'goodbye':", num_goodbye_lines, "\n")
@@ -297,7 +300,7 @@ hello_lines_b <- b_lyrics %>%
   filter(str_detect(line, regex("\\bhello\\b", ignore_case = TRUE)))
 
 
-print(hello_lines_b)
+#print(hello_lines_b)
 
 
 num_hello_lines_b <- nrow(hello_lines_b)
@@ -308,7 +311,7 @@ goodbye_lines_b <- b_lyrics %>%
   filter(str_detect(line, regex("\\bgoodbye\\b", ignore_case = TRUE)))
 
 
-print(goodbye_lines_b)
+#print(goodbye_lines_b)
 
 
 num_goodbye_lines_b <- nrow(goodbye_lines_b)
@@ -359,15 +362,21 @@ ggplot(top_words, aes(x = reorder(word, n), y = n, fill = sentiment)) +
   geom_bar(stat = "identity") +
   coord_flip() +
   labs(
-    title = "Top 25 Most Frequent Words in Beyonce's Lyrics",
+    title = "Top 25 Most Frequent Words in Beyoncé's Lyrics",
     x = "Word",
     y = "Frequency",
-    fill = "Sentiment"
+    fill = "Sentiment",
+    caption = "Created by Moran Guo"
   ) +
   theme_classic() +
   theme(axis.text.y = element_text(size = 10))
 
-wordcloud(words = top_words$word, freq = top_words$n, colors = ifelse(top_words$sentiment == "positive", "blue", "red"), scale = c(3, 2), vfont=c("serif","plain"))
+wordcloud(words = top_words$word, 
+          freq = top_words$n, 
+          colors = ifelse(top_words$sentiment == "positive", "blue", "red"), 
+          ordered.colors = TRUE, 
+          scale = c(3, 2), 
+          vfont=c("serif","plain"))
 ```
 
 ## Part 2D
@@ -375,7 +384,7 @@ wordcloud(words = top_words$word, freq = top_words$n, colors = ifelse(top_words$
 Repeat the same analysis as above in Part 2C, but for `ts_lyrics`.
 
 ```{r sentiment ts}
-# Load necessary libraries
+# Load required packages
 library(dplyr)
 library(tidytext)
 library(ggplot2)
@@ -408,16 +417,19 @@ ggplot(ts_top_words, aes(x = reorder(word, n), y = n, fill = sentiment)) +
     title = "Top 25 Most Frequent Words in Taylor Swift's Lyrics",
     x = "Word",
     y = "Frequency",
-    fill = "Sentiment"
+    fill = "Sentiment",
+    caption = "Created by Moran Guo"
   ) +
   theme_classic() +
   theme(axis.text.y = element_text(size = 10))
 
-wordcloud(words = ts_top_words$word, freq = ts_top_words$n, 
-          scale = c(3, 2), colors = ifelse(ts_top_words$sentiment == "positive", "blue", "red"),
+wordcloud(words = ts_top_words$word, 
+          freq = ts_top_words$n, 
+          scale = c(3, 2), 
+          colors = ifelse(ts_top_words$sentiment == "positive", "blue", "red"), 
+          ordered.colors = TRUE,
           vfont=c("serif","plain"))
 ```
-
 
 ## Part 2E
 
@@ -449,24 +461,31 @@ word_sentiments_album <- word_counts_album %>%
 
 average_sentiment_album <- word_sentiments_album %>%
   group_by(Album) %>%
-  summarise(average_sentiment = mean(value * n))
+  summarise(average_sentiment = sum(value * n)/sum(n))
+
+average_sentiment_album <- average_sentiment_album %>%
+  mutate(Album = ifelse(Album == "reputation", "Reputation", Album))
 
 print(average_sentiment_album)
 
 
 us_sales <- filtered_sales %>% filter(country == "US")
+
+
 combined_data <- us_sales %>%
   inner_join(average_sentiment_album, by = c("title" = "Album"))
 
 ggplot(combined_data, aes(x = released, y = average_sentiment, size = sales_millions)) +
   geom_point(alpha = 0.7) +
+  geom_text(aes(label = title), vjust = -1, size = 3) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(
     title = "Average Sentiment Score of Taylor Swift's Albums Over Time",
-    subtitle = "Analyzing the sentiment of lyrics in relation to album release dates and sales",
+    subtitle = "Decreasing trend in terms of avg. sentiment score was found in Taylor Swift's albums \nafter year 2006, with small bounce back lately.",
     x = "Album Release Date",
     y = "Average Sentiment Score",
-    size = "Sales (in millions)"
+    size = "Sales (in millions)",
+    caption = "Created by Moran Guo"
   ) +
   theme_classic()
 
